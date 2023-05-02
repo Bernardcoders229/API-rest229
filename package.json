@@ -19,6 +19,11 @@
   },
   "homepage": "https://github.com/Bernardcoders229/API-rest229#readme",
   "dependencies": {
+    "babel-register": "^6.26.0",
+    "body-parser": "^1.20.2",
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "morgan": "^1.10.0"
   }
 }
