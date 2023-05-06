@@ -3,7 +3,7 @@ const express = require('express')
 const bodyParser= require('body-parser')
 const morgan = require('morgan')
 const app = express()
-const func = require('function')
+const {success, error} = require('function')
 const members = [
     {
         id:1,
@@ -22,24 +22,29 @@ const members = [
         name: 'Cheridane'
     }
 ]
- 
- 
-app.use(bodyParser.json()) // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
+let MembersRouter = express.Router()
+
+ 
 app.use(morgan('dev'))
+app.use(bodyParser.json())  
+app.use(bodyParser.urlencoded({ extended: true }))   
 
-app.get('/api/v1/members/:id', (req, res)=>{
-    res.json(func.success(members[(req.params.id)-1]))
+MembersRouter.route('/:id')
+
+
+//requetes get
+.get((req, res)=>{
+    res.json(success(members[(req.params.id)-1]))
 })
 
-app.get('/api/v1/members',(req, res)=>{
+.get((req, res)=>{
     if(req.query.max != undefined && req.query.max>0){
-        res.json(func.success(members.slice(0, req.query.max)))
+        res.json(success(members.slice(0, req.query.max)))
     }else if(req.query.max != undefined){
-        res.json(func.error('Wrong max value'))
+        res.json(error('Wrong max value'))
     }else{
-        res.json(func.success(members))
+        res.json(success(members))
     }
 })
 
@@ -55,10 +60,91 @@ app.get('/api/v1/members',(req, res)=>{
 //    res.send(req.params)
 //})
 
-app.post('/api/v1/members',(req, res) => {
-    res.send(req.body)
+
+//requete put
+ .put((req, res)=>{
+    let index = getIndex(req.params.id);
+    if (typeof(index)=='string') {
+        res.json(error(index))
+        
+    }else{
+        let member = members[index];
+        let same = false
+        for(let i = o; i<members.length; i++){
+             if (req.body.name == members[i].name && req.params.id != members[i].id) {
+                same = true 
+                break
+             }
+        }
+        if(same){
+            res.json(error('same name'))
+        }else {
+            members[index].name = req.body.name
+            res.json(success(true))
+        }
+    }
 })
+
+
+//requete post
+ .post((req, res) => {
+    
+    if (req.body.name) {
+let sameName = false
+        for (let i = 0; i< members.length; i++){
+            if (members[i].name == req.body.name) {
+                sameName = true 
+                break
+            }
+        }if (sameName) {
+            res.json(error('name already taken'))
+            
+        }else{
+            let member= {
+                id:members.length+1,
+                name: req.body.name
+            }
+            members.push(member)
+
+            res.json(success(member))
+        
+        }
+
+        
+      
+     }else {
+        res.json(error('no name value '))
+     }
+})
+
+
+
+//requete delete
+.delete((req, res)=> {
+    let index = getIndex(req.params.id);
+    if (typeof(index)=='string') {
+        res.json(error(index))
+        
+    } else {
+        members.splice(index,1)
+        res.json(success(members))
+    }
+})
+
+
+
+
+app.use('/api/v1/members', MembersRouter)
+
 app.listen(8080, () => console.log('Started on port 8080.'))
 
-
+function getIndex(id) {
+    for(let i = o; i<members.length; i++){
+        if (members[i],id== id) {
+            return i
+        }
+        return 'wrong id'
+    }
+    
+}
  
